@@ -1,0 +1,4 @@
+,Model,Silhouette (sample)
+0,KMeans,0.3346739450703381
+1,DBSCAN,0.1157
+2,BIRCH,0.4021
