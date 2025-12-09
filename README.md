@@ -1,19 +1,19 @@
-# 1. Introduction
+# Introduction
 
 **Team Leader:** Yelena Shabanova (320991)  
 **Team Members:** Alena Seliutina (323591), Luis Fernando Henriquez Patino (314661)
 
-In this project, we explored the Audience Decode dataset using unsupervised machine learning techniques. The dataset contains detailed rating histories for each user, summary statistics for both users and movies, and additional movie-level attributes. Our goal was to identify meaningful groups of users, detect unusual behavioral patterns, and compare how different clustering algorithms perform on high-dimensional, noisy data.
+In this project, we explored the Audience Decode task using unsupervised machine learning techniques. Report of our work will follow the numerical order that corresponds with the `main.ipynb` sections. The provided dataset  contains detailed rating histories for each user, summary statistics for both users and movies, and additional movies' attributes. Our goal was to explore and model audience behavior. Moreover, we aimed to identify meaningful groups of users, detect unusual behavioral patterns, and compare how different clustering algorithms perform on high-dimensional, noisy data.
 
-We started by performing an exploratory data analysis (EDA) on both users and movies. This helped us better understand rating distributions, activity patterns, and relationships between features. Before clustering the users, we first applied clustering to the movie dataset to create pseudo-genres. They later helped us interpret user preferences.
+We started by performing an exploratory data analysis (EDA) on both users and movies. This helped us better understand rating distributions, activity patterns, and relationships between features. We first applied clustering to the movie dataset to create pseudo-genres since the project description mentions "analyzing interaction with genres" but this information is not provided in database. Therefore, we made our definition of content types based on features given in movie data. They later helped us interpret user preferences.
 
-Next, we clustered the users using three methods: K-Means, DBSCAN, and BIRCH. Each model has different strengths, but after comparing the results, we chose K-Means as our main model because it produced the clearest and most stable clusters. These user clusters represent different types of audience behavior and allow us to estimate their pseudo-genre preferences.
+Next, we clustered the users using three methods: K-Means, DBSCAN and BIRCH. Each model has different strengths, but after comparing the results, we chose K-Means as our main model, because it produced the detailed and most stable clusters. These user clusters represent different types of audience behavior and allow us to estimate their pseudo-genre preferences.
 
 Finally, we looked at how these preferences changed over time to understand how audience behavior evolves. Overall, our project shows how unsupervised learning can help discover hidden patterns in user interactions and provide insights into audience segmentation.
 
 ---
 
-# 2. Methods
+# Methods
 
 After managing the libraries and loading all data by connecting to the `viewer_interactions.db`, we load the key tables into pandas DataFrames. We got:
 
@@ -25,11 +25,11 @@ Then we started from exploratory data analysis, continuing through preprocessing
 
 ---
 
-# 3. Exploratory Data Analysis (EDA)
+## 3. Exploratory Data Analysis (EDA)
 
 We must have understood the model behaviour. Therefore, we performed an EDA to analyze the distributions of our data. For this part we mainly used `pandas`, `numpy`, `matplotlib`, and `seaborn`, as well as `sqlite3` to extract data from the original database.
 
-## 3.1 User EDA
+### 3.1 User EDA
 
 In this section, using `user_statistics`, our goal was to understand viewer activity patterns and the distributions of key behavioral features. Then we were able to cluster users based on shared patterns. We examined distributions of:
 
@@ -58,7 +58,6 @@ Next, we plotted a histogram of `total_ratings` (Figure U2) to understand how ac
 **Figure U2 – Histogram of total ratings per user**  
 ![U2 – user total ratings](images/user_total_ratings_hist.png)
 
-**Interpretation (U2):**
 
 - Most users rate very few movies: the majority give between 1 and 5 ratings.  
 - Around 75% of users rate fewer than 11 movies, showing a large group of low-activity users.  
@@ -70,7 +69,6 @@ Then we looked at the distribution of users’ average rating using a histogram 
 **Figure U3 – Histogram of average user rating**  
 ![U3 – user avg rating histogram](images/user_avg_rating_hist.png)
 
-**Histogram interpretation (U3):**
 
 - Most users have an average rating between 3.0 and 4.0, showing a general positive bias.  
 - There are visible spikes at integer values, as ratings are discrete (1–5).  
@@ -79,7 +77,6 @@ Then we looked at the distribution of users’ average rating using a histogram 
 **Figure U4 – Violin plot of average user rating**  
 ![U4 – user avg rating violin](images/user_avg_rating_violin.png)
 
-**Violin plot interpretation (U4):**
 
 - The densest region is around 3.5–4.0, confirming most users tend to rate positively.  
 - Thin tails at the extremes indicate small groups of consistently harsh or consistently generous users.  
@@ -90,7 +87,6 @@ To study how activity influences consistency, we grouped users into activity qua
 **Figure U5 – Rating behaviour by activity level**  
 ![U5 – user activity vs rating](images/user_activity_vs_rating_violin.png)
 
-**Interpretation (U5):**
 
 - Mean ratings stay pretty similar across activity levels, so activity does not significantly change the average score.  
 - Low-activity users show very wide variation in average ratings, including many extreme values.  
@@ -102,7 +98,6 @@ Then, we plotted a scatterplot of `unique_movies` vs `total_ratings` using a sam
 **Figure U6 – Unique movies vs total ratings**  
 ![U6 – unique vs total ratings](images/user_unique_vs_total_ratings_scatter.png)
 
-**Interpretation (U6):**
 
 - Points lie very close to a curved line, indicating a near-linear relationship between `unique_movies` and `total_ratings`.  
 - This confirms that users almost never re-rate the same movie.  
@@ -113,7 +108,6 @@ Finally, we created a correlation heatmap of the main user features (Figure U7).
 **Figure U7 – Correlation heatmap of user features**  
 ![U7 – user features correlation](images/user_features_correlation_heatmap.png)
 
-**Interpretation (U7):**
 
 - Strong correlations appear between activity-related features (`total_ratings` and `unique_movies`).  
 - Other features (such as `avg_rating` and `std_rating`) provide additional, less correlated information about rating style and consistency.
@@ -124,7 +118,7 @@ All figures U1–U7 mentioned above are stored in the `images/` folder and refer
 
 ---
 
-## 3.2 Movie EDA
+### 3.2 Movie EDA
 
 To understand the behavior of movies in the platform and prepare for later movie clustering, we analyzed the `movie_statistics` and `movies` tables. Similar to the user-side EDA, the goal was to understand distribution patterns, find meaningful content-related features and find relationships that could affect clustering performance.
 
@@ -188,7 +182,6 @@ Finally, we computed a correlation matrix (Figure M7) for key movie features. Se
 **Figure M7 – Correlation heatmap of movie features**  
 ![M7 – movie features correlation](images/movie_features_correlation_heatmap.png)
 
-**Interpretation (M7):**
 
 - `rating_count` has moderate correlation with `std_rating` and weak correlation with `avg_rating`, meaning popularity is not simply tied to quality.  
 - `avg_rating` and `std_rating` are only weakly related, indicating both provide distinct information.  
@@ -200,7 +193,7 @@ All figures M1–M7 are stored in the `images/` folder and referenced in the REA
 
 ---
 
-# 4. Preprocessing and Feature Engineering
+## 4. Preprocessing and Feature Engineering
 
 After completing the EDA, we prepared both user and movie data for clustering. Since our methods (KMeans, DBSCAN, BIRCH) are distance-based, they require a consistent set of numeric features, no missing values and features on comparable scales. To achieve this, we built two standardized feature matrices:
 
@@ -209,7 +202,7 @@ After completing the EDA, we prepared both user and movie data for clustering. S
 
 These matrices are the direct input to the clustering models used in Sections 5 and 6.
 
-## 4.1 User Feature Matrix
+### 4.1 User Feature Matrix
 
 From the User EDA, we saw that viewers differ mainly in:
 
@@ -230,7 +223,7 @@ We first extracted these columns into a dedicated DataFrame and inspected missin
 
 This produced the final user feature matrix `X_users_kmeans`, which contains one standardized behavioral vector per user and no missing values. Although `total_ratings` and `unique_movies` are highly correlated (as shown in the User EDA), we kept both during preprocessing to maintain consistency with earlier steps and let later clustering design decide on redundancy.
 
-## 4.2 Movie Feature Matrix
+### 4.2 Movie Feature Matrix
 
 On the movie side, EDA showed that films differ along four main dimensions:
 
@@ -252,7 +245,7 @@ As with users, we imputed all missing values with the median for each feature. T
 
 The result is the movie feature matrix `X_movies_kmeans`, a clean, fully numeric and standardized representation of every movie used in the clustering methods of Section 5.
 
-## 4.3 Summary of Preprocessing Decisions
+### 4.3 Summary of Preprocessing Decisions
 
 We came to several conclusions across both users and movies:
 
@@ -265,7 +258,7 @@ We got final matrices ready for clustering: `X_users_kmeans` and `X_movies_kmean
 
 ---
 
-# 5. Movie Clustering (Pseudo-Genre Discovery)
+## 5. Movie Clustering (Pseudo-Genre Discovery)
 
 Before clustering users, we first clustered movies into pseudo-genres, since user interpretation later depends on movie grouping. For this section, we used scikit-learn’s KMeans and PCA for visualization.
 
@@ -280,7 +273,7 @@ The movie feature matrix included many behavioral attributes such as:
 
 After standardization, these variables form the input for clustering.
 
-## 5.1 Determining Number of Clusters
+### 5.1 Determining Number of Clusters
 
 We evaluated several values of k using: the Elbow Method (Figure MC1), Silhouette Scores (Figure MC2). Both evaluation criteria suggested k = 6 as a reasonable choice, balancing compactness and interpretability.
 
@@ -304,7 +297,7 @@ In the end both diagnostics supported our decision to choose k = 6 as number of 
 - stability,  
 - and interpretability of results.
 
-## 5.2 Training and PCA Visualization
+### 5.2 Training and PCA Visualization
 
 We selected k = 6 as the optimal number of movie clusters based on earlier evaluation. A K-Means model was then initialized with this value and trained on the standardized movie features.
 
@@ -323,7 +316,7 @@ To visualize high dimensional clustering results, we applied a two component PCA
 
 PCA was used strictly for visualization; clustering was performed on the standardized full feature space.
 
-## 5.3 Interpreting the Pseudo-Genres
+### 5.3 Interpreting the Pseudo-Genres
 
 We summarized each movie cluster using descriptive statistics (Figure MC4) and manually interpreted their characteristics, making the final pseudo-genres:
 
@@ -370,7 +363,7 @@ We summarized each movie cluster using descriptive statistics (Figure MC4) and m
 
 # 3. Experimental Design
 
-## 1. User Clustering
+## 6. User Clustering
 
 Once pseudo-genres were established, we clustered users based on their engagement level and rating style to uncover behavior-based viewer types.
 
@@ -385,7 +378,7 @@ We evaluated multiple clustering algorithms:
 - DBSCAN on the full standardized matrix  
 - BIRCH with behaviour-weighted features  
 
-### 1.1 K-Means: Choosing the Number of User Clusters
+### 6.1 K-Means: Choosing the Number of User Clusters
 
 We applied the same methods as for movies: Elbow plot for inertia (Figure UC1); Silhouette scores.
 
@@ -396,11 +389,14 @@ To choose the number of clusters for K-Means, we:
 
 - Took a random sample from the standardized feature matrix: `X_users_kmeans`.  
 - For each k ∈ {2,…,10} we: fit K-Means on the sample and computed the silhouette score and inertia (Elbow method).  
-- Additionally, we used `KElbowVisualizer` on the full matrix to confirm elbow region.  
+- Additionally, we used `KElbowVisualizer` on the full matrix to confirm elbow region (Figure UC2).
 
-The silhouette score was highest at k = 2, but that solution is too rough. Among all k > 2, k = 6 achieved the best silhouette score and lay in the elbow region of the inertia curve, while also yielding richer, more interpretable segments. Therefore we selected k = 6 as the number of user clusters for K-Means.
+**Figure UC2 – Distortion Score Elbow for K-means Clustering**
+![UC2 - distortion score](images/user_kmeans_distortion_score.png)
 
-### 1.2 KMeans: Final User Segmentation
+- The silhouette score was highest at k = 2, but that solution is too rough. Among all k > 2, k = 6 achieved the best silhouette score and lay in the elbow region of the inertia curve, while also yielding richer, more interpretable segments. Therefore we selected k = 6 as the number of user clusters for K-Means.
+
+### KMeans: Final User Segmentation
 
 With k = 6 fixed, we trained K-Means on the full standardized user dataset:
 
@@ -418,7 +414,7 @@ We then:
 
 This resulted in six distinct behavioral user types, later given descriptive names. These profiles are used later to interpret engagement patterns and preferences.
 
-### 1.3 DBSCAN Analysis
+### 6.2 DBSCAN Analysis
 
 To explore density-based structure, we applied DBSCAN directly on the full standardized user matrix.
 
@@ -443,7 +439,7 @@ We then:
 
 This confirmed that, although DBSCAN reveals some density-based structure, the data is dominated by a large homogeneous core, and the resulting segmentation is not as clean or interpretable as K-Means.
 
-### 1.4 BIRCH Analysis
+### 6.3 BIRCH Analysis
 
 Considering all models, we decided to experiment with BIRCH due to how it handles big data.
 
@@ -472,9 +468,9 @@ On this behaviour-weighted matrix (`X_birch`), we trained:
 **Figure BCH2 – BIRCH clusters (PCA projection)**  
 ![BCH2 – user clusters BIRCH PCA](images/user_clusters_birch_pca_scatter.png)
 
-This produced four interpretable audience patterns, distinguishing casual users, explorers, irregular users, and heavy users in a more behavior-focused way than the unweighted version.
+This produced four interpretable audience patterns, distinguishing long-time users, critical short-term users, long-term enthusiasts and positive casual raters in a more behavior-focused way than the unweighted version.
 
-### 1.5 Evaluation of Clustering Quality
+### 6.4 Evaluation of Clustering Quality
 
 We compare these models based on silhouette score as evaluation metric. The silhouette score measures how well defined the clusters are. Score ranges from -1 to 1:
 
@@ -498,46 +494,46 @@ In practice, this makes K-Means the most stable and intuitive method for segment
 **DBSCAN**  
 Silhouette Score: ~0.2 (computed only on non-noise users)
 
-DBSCAN struggles with this dataset because:
+DBSCAN struggles with this dataset because user data is very high-dimensional and DBSCAN works best in low dimensional spaces. Moreover, the dataset is highly uneven, with many low-activity users and few heavy users—DBSCAN treats this as one giant dense region.  
 
-- User data is very high-dimensional and DBSCAN works best in low dimensional spaces.  
-- The dataset is highly uneven, with many low-activity users and few heavy users—DBSCAN treats this as one giant dense region.  
-
-DBSCAN produces:
+As a result, DBSCAN produces:
 
 - One massive cluster containing ~95% of all users  
 - Several tiny clusters  
-- A large amount of noise (points it cannot cluster)  
+- A large amount of noise  
 
-This indicates poor cluster separation and shows that density-based clustering is not appropriate for this type of behavioral data. DBSCAN is helpful for understanding density structure, but not useful for producing interpretable user segments.
+We understood that user behavior does not create clear density-separated groups. Instead, most users fall into the same broad behavioural region, and the few unusual users only form small, unstable clusters.
+DBSCAN helps confirm the overall shape and density of the dataset, but it does not produce meaningful or interpretable user segments.
+It gives less stable and useful clustering results, than K-means and Birch.
 
 **BIRCH (k = 4, with behaviour-weighted features)**  
-Silhouette Score: ~0.40 (highest)
+Silhouette Score: ~0.48 (highest)
 
-BIRCH performs well after applying behavior-weighted features, producing:
-
-- Four clear audience groups  
-- Broad distinct patterns in activity, viewing diversity, and rating stability  
-- A compact, well-separated cluster structure  
+BIRCH performs well after applying behavior-weighted features, producing four clear audience groups; broad distinct patterns in activity, viewing diversity, and rating stability; and a compact, well-separated cluster structure  
 
 However, BIRCH creates broader and more general clusters, making it less detailed for behavioral segmentation compared to K-Means. It is valuable as a complementary view, but not as the main model for downstream analysis.
 
 **Final Decision: K-Means is Selected**
 
-Although BIRCH achieves a higher silhouette score, K-Means is chosen as the final user clustering model because:
+Although BIRCH achieves a higher silhouette score, we chose K-Means as the final user clustering model for several reasons:
 
-- It creates six well-balanced, interpretable audience segments  
-- Clusters reflect meaningful behavioral traits  
-- It scales efficiently and requires no manual tuning  
-- It provides the information needed for analyzing genre preferences and long-term engagement patterns  
+- It creates six well-balanced and interpretable audience segments  
+- Clusters reflect meaningful behavioral traits
+- The algorithm is computationally efficient and easy to scale  
+- It provides exact, stable clusters needed for analyzing genre preferences and long-term engagement
 
-Therefore, K-Means with k = 6 is selected for all final analyses, while DBSCAN and BIRCH serve as comparison models.
+Therefore, K-Means with k = 6 is selected as the main model for all final analyses.
+DBSCAN and BIRCH are included only as comparison methods to show how alternative clustering approaches behave on the same data.
 
-(An overall silhouette comparison could be summarized in `images/user_clustering_model_scores.csv` if desired.)
+An overall silhouette comparison is summarized in comparison table of models' scores:
 
-### 1.6 Interpreting User Clusters
+[images/user_clustering_model_scores.csv](images/user_clustering_model_scores.csv)
 
-After finalizing K-Means we have to reference user groups in later sections, so we assign descriptive behavioral labels. The names and parameters that were given are:
+
+### Interpretion of User Clusters for a chosen K-means model
+
+After we finished K-Means, we had to reference user groups in later sections, so we assigned descriptive behavioral labels. 
+The names and parameters that were given are:
 
 - **Cluster 0 — Consistent Enjoyers**  
   - ~29 total ratings, ~29 unique movies  
@@ -581,204 +577,290 @@ These clusters represent distinct audience types and are later used to analyze:
 - How engagement and rating behaviour evolve over time  
 - How viewing patterns differ across segments in terms of intensity, generosity, and stability  
 
----
 
-# 2. User–Movie Preferences
+
+## 7. User–Movie Preferences
 
 This section unites two major components of our project:
 
-- **Audience Segments:** discovered through user clustering  
-- **Content Groups:** groups derived from movie clustering  
+- **Audience Segments:** discovered through user clustering, where 487,780 users were matched to one of the six user clusters derived
+  
+- **Content Groups:** groups derived from movie clustering, where 16,013 movies were matched to one of the six behavioral genres 
 
 To understand how different audiences engage with different types of content and how this behavior changes over time, we analyze the `viewer_ratings` interaction table, which contains over four million ratings. Because loading this table all at once would exceed available memory, the analysis is designed to extract only necessary columns and load it in chunks, allowing us to clearly observe the evaluation and efficiency of the data.
 
-## 2.1 Merging Users and Movie Clusters
+### 7.1 Merge of Users and Movie Clusters
 
-Before analyzing preferences, we combine three tables:
+Before analyzing preferences, we combined three tables:
 
-- `viewer_ratings` (customer_id, movie_id, rating, date)  
+- viewer ratings (`customer_id`, `movie_id`, `rating, date`)  
 - user cluster labels  
 - movie cluster labels  
 
-We create simple lookup dictionaries containing a map between each user/movie and their respective cluster. Then we start iterating through the ratings table in chunks of 400k rows. For each chunk we:
+We create simple lookup dictionaries, which contain a map between each user/movie and their respective cluster. Then we start iterating through the ratings table in chunks of 400k rows. For each chunk we attach the audience segment and movie genre to each rating; extract the year the rating was made and store the partial summaries and yearly activities for later.  
 
-- attach the audience segment and movie genre to each rating  
-- extract the year the rating was made  
-- store the partial summaries and yearly activities for later  
+This allowed us to understand which audience segments watch which pseudo-genres, and how this changes over time.
 
-This will allow us to study which audience segments watch which pseudo-genres, and how this varies over time.
+### 7.2 The Build of the Matrices
 
-- **EXP1:** Head of merged interaction table  
-- **EXP2:** Interaction distribution per (`user_cluster`, `movie_cluster`)  
-
-(These can be stored as CSVs if desired.)
-
-## 2.2 Building the Matrices (Section 7.2)
-
-After merging users, movies, and interactions, the next step is to quantify how each user segment engages with each movie genre. To do this, we construct three complementary matrices that summarize viewing behavior and preferences.
+After we merged users, movies, and interactions, the next step was to quantify how each user segment engages with each movie genre. To do this, we constructed three complementary matrices that summarize viewing behavior and preferences.
 
 **Methods Used:**
 
-For every combination of (`user_clusters`, `movie_clusters`), we compute:
+For each pair *(`user_clusters`, `movie_clusters`)*, we compute:
 
-- **Rating count:** how many ratings that user group gave to that genre  
-  - Reflects how much exposure each audience segment has to a given pseudo-genre.  
-- **Average rating:** mean value of those ratings  
-  - Reflects how positively or negatively each group reacts to that genre.  
-- **Engagement share:** rating count divided by the group’s total ratings  
-  - Expresses what portion of their overall viewing each genre represents. Is this user type mainstream-oriented, niche-oriented, or balanced?
+- `n_ratings` - how many ratings this audience segment gave to that content type  
+- `avg_rating` - how they rate that content type on average  
 
-**Why do these metrics matter?**
+Based on these values together we build 3 complementary matrices:
 
-- Average rating = preference intensity  
-- Count = familiarity / exposure  
-- Share = viewing composition for each audience segment  
 
-These three values together can describe what they watch, how often they watch it, and how much they like it.
-
-**Matrices Produced:**
-
-- **Preference Matrix (`pref_mean`)**  
-  - rows: user clusters  
-  - columns: movie pseudo-genres  
-  - values: average rating  
-
-  Table stored in:  
+- **Preference Matrix (`pref_mean`)**:
   [images/average_rating_summary.csv](images/average_rating_summary.csv)
 
-- **Count Matrix (`pref_count`)**  
-  - shows how many ratings each group gives to each genre  
+The table reports the average rating each user segment assigns to each genre. This allows us to compare how positively different audiences evaluate different types of content. 
 
-  Table stored in:  
+
+- **Count Matrix (`pref_count`)**   
+ 
   [images/number_ratings_summary.csv](images/number_ratings_summary.csv)
 
-- **Engagement Share Matrix (`engagement_share`)**  
-  - normalizes counts to proportions, revealing dominant vs. minor genres for each audience segment  
+The table reports how many ratings each user cluster assigned to each genre, showing how strongly different audience segments engage with various content types.
 
-  Table stored in:  
+
+- **Engagement Share Matrix (`engagement_share`)** 
+
   [images/share_genre_in_user_segment.csv](images/share_genre_in_user_segment.csv)
 
-**Figures**
+This table reports the proportion of each genre within the viewing activity of each user cluster. It shows what types of movies each user segment actually spends their time watching, regardless of rating behavior.
 
-- **EXP3: Heatmap of average ratings**  
-  ![EXP3 – average rating heatmap](images/average_rating_user_segment_genre.png)
 
-- **EXP4: Heatmap of rating frequencies / viewing share**  
-  ![EXP4 – share of genres watched](images/share_genres_watched_by_users.png)
+To summarize above mentioned matrices, we built 2 heatmaps: 
+1. Heatmap of average ratings based on preference matrix
+2. Heatmap of rating frequencies based on engagement share matrix 
 
-These two heatmaps form the central behavioral comparison of user clusters.
+They will be interpreted in the next section.
 
-## 2.3 Temporal Analysis Design
 
-To analyze how behavior changes over time, timestamps in `viewer_ratings` are converted to years.
+### 7.3 Temporal Analysis Design
 
-For each year, we compute:
+To analyze how behavior changes over time, date-time in `viewer_ratings` are converted to years.
+
+For each year, we computed:
 
 - number of ratings given by each user cluster  
-- number of ratings received by each movie pseudo-genre  
+- number of ratings received by each genre 
 
-We then convert these into yearly shares, which allows clusters and genres to be compared even when overall platform activity changes.
-
-**Figures:**
-
-- **EXP5: User cluster activity over time**  
-  ![EXP5 – user cluster activity over time](images/user_total_share_over_time.png)
-
-- **EXP6: Movie cluster popularity over time**  
-  ![EXP6 – movie cluster popularity over time](images/movie_cluster_popularity_over_time.png)
-
-Yearly aggregation is chosen because it offers a clear, stable view of long-term patterns.
+We then converted these into yearly shares. This allowed us to compute how activity of users changes and the popularity of genres over years. Findings are shown and interpreted in the next section by graphs.
 
 ---
 
-# 4. Results
+# Results
 
-This section represents the main findings of the project after computing every single section that has been mentioned before. The results summarize how different audience segments engage with different types of movies, how positively they rate them and how their viewing patterns change in scale and composition.
+This section represents the main findings of the project after computing every single section that has been mentioned before. The results summarize how different audience segments engage with different types of movies, how positively they rate them and how their viewing patterns change in scale and structure.
 
-By combining the movie clusters and the user clusters with the full interaction history, we obtain a complete picture of the platform audience environment, revealing which users prefer which genres, which groups are most active and how taste patterns differ across segments.
+By combining the movie clusters and the user clusters with the full interaction history, we obtained a complete picture of the platform audience environment, revealing which users prefer which genres, which groups are most active and how tastes differ across segments.
 
-## 4.1 Mapping of Users and Movies to Clusters
+First, we provide an interpretation of our results through heatmaps and graphs that we discussed in previous section.
 
-The result of the final table shows that every user and every movie could be successfully assigned to a cluster. The lookup tables produced two key results:
+## Heatmaps Interpretation
 
-- 487,780 users were matched to one of the six user clusters derived  
-- 16,013 movies were matched to one of the six behavioral pseudo-genres  
+### Share of Genres Watched Heatmap
+This heatmap shows the proportion of each genre within each user segment’s total viewing activity.
 
-These values show that clustering coverage is almost complete: nearly the entire dataset of users and movies has a valid cluster label. This is important because later results can only be computed if every interaction can be mapped to both a user segment and a movie category.
+![EXP4 – share of genres watched](images/share_genres_watched_by_users.png)
 
-This confirms that the system read the entire rating database in multiple chunks. This ensures that more than 4 million rating events were successfully merged with both types of cluster information, meaning that every rating knows which type of user produced it and every rating also knows which type of movie was rated.
+- Mainstream genres dominate viewing for nearly all user groups. Bright blue blocks under Blockbusters and Popular Films (0.52 for Fan Visitors, 0.43 for Consistent Enjoyers) show that these categories absorb most platform activity.
 
-(If needed, detailed cluster summaries can be referenced from  
-[images/user_cluster_summary_kmeans.csv](images/user_cluster_summary_kmeans.csv) and  
-[images/movie_cluster_summary.csv](images/movie_cluster_summary.csv).)
+- Heavy Enthusiasts appear more exploratory. Their row contains noticeably lighter cells for Old Classics (0.08) and Well-Liked Niche Films (0.04), indicating above-average engagement with less mainstream content.
 
-## 4.2 User–Movie Cluster Preference Matrix
+- One-Movie Critics show a unique viewing anomaly. The lightest cell in the Hated Invisible Films column (0.06) appears in their row, unlike all other clusters. This shows disproportionate consumption of fringe or obscure titles.
 
-The table summarizes how each user cluster interacts with each movie cluster by combining all rating events and computing both the total rating volume (`n_ratings`) and the average rating they assign (`avg_rating`). This gives a high-level view of preference strength and engagement patterns across clusters.
+- Short-Term Users and Consistent Enjoyers share similar viewing patterns. Their rows have nearly identical blue intensity across Blockbusters and Popular Films, showing strong mainstream focus.
 
-Table:
+### Average Ratings Given Heatmap
+This heatmap displays the average rating each user cluster assigns to each movie genre.
 
-- [images/average_rating_user_movie_summary.csv](images/average_rating_user_movie_summary.csv)
+ ![EXP3 – average rating heatmap](images/average_rating_user_segment_genre.png)
 
-The first rows show:
+- Fan Visitors stand out with the brightest (yellow) row.
+ Their ratings cluster around 4.44–4.48, showing extremely positive evaluations across all genres.
 
-- **High rating volumes:** indicate strong exposure and engagement between certain user–movie cluster pairs.  
-- **Average ratings remain consistently high:** suggesting that user clusters generally rate the movies they watch positively regardless of the specific pairing.  
-- **The presence of lower volume combinations:** highlights niche interaction.  
-- **Systematic preference patterns** across the matrix.
+- One-Movie Critics form the darkest (purple) row.
+ Ratings such as 1.55 (Hated Invisible Films) and 2.19–2.66 across other categories show consistently negative evaluation patterns. 
 
-## 4.3 Preference Matrix: Average Ratings Across User and Movie Clusters
+- Consistent Enjoyers and Short-Term Users display stable mid-green shades.
+ Their rows remain consistently around 3.6–3.8, showing balanced, predictable, moderate positivity.
 
-To understand how different audience segments engage with different types of movies, we constructed a preference matrix showing the average rating each user cluster assigns to each movie cluster.
+- Heavy Enthusiasts, sit in the middle band.
+ Their ratings (3.10–3.67) are neither too low nor too high, matching their broad viewing behavior.
 
-This matrix is visualized as:
+- Loyal Occasional Enjoyers show moderately warm colors in mainstream genres like Blockbusters (3.72) and Well-Liked Niche Films (3.77), showing generally positive attitudes toward common content.
 
-- **Average ratings heatmap:**  
-  ![Average rating heatmap](images/average_rating_user_segment_genre.png)
 
-(And the underlying table is in  
-[images/average_rating_summary.csv](images/average_rating_summary.csv).)
+## Graphs Interpretation
+### User Cluster Activity Over Time
 
-Key patterns:
+This plot shows how the share of total user activity (ratings) changed for each user group from 1995 to 2006.
 
-- **One-time Fan Visitors** show the strongest positive bias, giving the highest scores across almost every movie category. In the table, they rate Controversial Invisible Titles (4.65), Old Classics (4.49), and Well-Liked Movies (4.48) particularly high, indicating selective watching with consistently generous evaluations.  
-- **Short-Term Users and Consistent Enjoyers** display moderate and stable ratings, generally in the 3.6–3.8 range for mainstream categories such as Well-Liked Movies and Blockbuster Hits. Their values show neither extreme liking nor disliking.  
-- **One-Movie Critics** are the lowest-rating cluster, with noticeably depressed averages across all movie types. This is clear from values like 1.37 for Controversial Invisible Titles and 2.05 for Hated Niche Films, making them the most critical group in the matrix.  
-- **Loyal Occasional Enjoyers** maintain balanced ratings, typically around 3.0–3.7 across categories. Their row shows no sharp jumps, suggesting broad but moderate appreciation.  
-- **Heavy Enthusiasts**, despite being highly active, rate movies in a narrow mid-range band (roughly 3.2–3.7). Their table values reflect a consistent, neither overly positive nor negative rating style.
+  ![EXP5 – user cluster activity over time](images/user_total_share_over_time.png)
 
-## 4.4 Number of Ratings Across Users and Movie Clusters
 
-The table reports how many ratings each user cluster assigned to each movie cluster, showing how strongly different audience segments engage with various content types.
+- Early years (1995–1999): One-Movie Critics dominate. 
+At the beginning of the platform, most activity came from users who only rated one or two movies. Their share is the highest in the late 1990s.
 
-- **Table of counts:**  
-  [images/number_ratings_summary.csv](images/number_ratings_summary.csv)
+- Around 2000–2001: A spike in Loyal Occasional Enjoyers.
+Suddenly, long-term but moderate users become the main group. Their activity share jumps dramatically for a short period, meaning many casual users joined.
 
-(Optionally, a corresponding bar/heat representation could be derived from these values.)
+- 2002 onward: Shift toward broader, more balanced usage. 
+Loyal Occasional Enjoyers decline again as the user base grows and becomes more mixed.
 
-The results described:
+- 2002–2005: Strong rise of Short-Term Users.
+A new wave of users appears (people who use the platform briefly, rate a few movies, and then leave). Their share becomes one of the biggest during these years.
 
-- **Short-Term Users and Consistent Enjoyers** contribute the largest share of total ratings across nearly all movie clusters. For example, they generate 386,627 and 563,452 ratings respectively for Well-Liked Movies, and over 600,000 and 425,000 ratings for Blockbuster Hits. Their high counts indicate heavy engagement with mainstream and widely consumed content.  
-- **Loyal Occasional Enjoyers** also show substantial activity, especially for Well-Liked Movies (253,493) and Blockbuster Hits (264,821), but at lower overall volumes compared to the more active clusters above.  
-- **Heavy Enthusiasts** produce moderately high rating counts across most categories, such as 214,006 ratings for Well-Liked Movies, though their activity drops sharply for niche categories, with only 10 ratings for Unnoticed Films and 10 for Controversial Invisible Titles.  
-- **One-time Fan Visitors** contribute significantly fewer ratings overall, consistent with their low-activity profile. They still participate meaningfully in Well-Liked Movies (85,057 ratings), but their engagement steeply declines for niche clusters like Controversial Invisible Titles (1,416) and Unnoticed Films (952).  
-- **One-Movie Critics** are the least active cluster in the dataset. Their rating counts are extremely low across all movie types. For instance, they contribute only 3,358 ratings for Old Classics, 1,426 for Blockbuster Hits, and 26 for Unnoticed Films.
+- Consistent Enjoyers also increase after 2002.
+Mid-activity, stable users grow steadily and peak around 2004. They represent a more engaged and persistent audience.
 
-## 4.5 Share of Each Genre in Each User Segment’s Viewing
+- Fan Visitors remain small but steady. 
+They contribute consistently but never dominate, which matches their behavior (rating only a couple of favourites).
 
-This table reports the proportion of each movie cluster within the viewing activity of each user cluster. It shows what types of movies each user segment actually spends their time watching, regardless of rating behavior.
+- Heavy Enthusiasts stay rare. T
+heir share is always low, but slowly increases over time—meaning “super-active” users exist, but they’re a small niche.
 
-- **Share table:**  
-  [images/share_genre_in_user_segment.csv](images/share_genre_in_user_segment.csv)
+  
+### Movie cluster (genres) popularity over time 
 
-- **Heatmap of viewing share (also EXP4):**  
-  ![Share of each genre in each user segment](images/share_genres_watched_by_users.png)
+This graph shows how much each user group contributed to all ratings over time. It helps us to see which audience types were most active in different years.
 
-The described results:
+![EXP6 – movie cluster popularity over time](images/movie_cluster_popularity_over_time.png)
 
-- **Well-Liked Movies** dominate viewing across all user clusters. The shares are highest here, with Heavy Enthusiasts at 0.533, Consistent Enjoyers at 0.485, and Loyal Occasional Enjoyers at 0.412. This indicates that all major user groups concentrate a significant portion of their viewing on mainstream, broadly appealing content.  
-- **Blockbuster Hits** are another major viewing category, especially for segments with high activity. Short-Term Users (0.543), Consistent Enjoyers (0.366), and One-time Fan Visitors (0.578) all show strong engagement with this cluster. This confirms that high-traffic user groups gravitate toward widely promoted or high-visibility films.  
-- **Hated Niche Films, Old Classics, and Unnoticed Films** represent very small portions of most users’ viewing patterns. For example, One-time Fan Visitors show only 0.042 of their viewing on Hated Niche Films and 0.004 on Unnoticed Films. Short-Term Users follow the same trend with 0.057 and 0.000, respectively. These low shares highlight that niche or less-publicized content is rarely consumed.  
-- **Consistent Enjoyers and Heavy Enthusiasts** show slightly higher engagement with smaller genres. Heavy Enthusiasts, for example, have 0.149 of their viewing on Hated Niche Films and 0.115 on Old Classics, noticeably higher than most clusters. This suggests more exploratory behavior.  
-- **One-Movie Critics** uniquely show their highest non-mainstream share in Hated Niche Films (0.171). Despite low overall activity, this cluster spends a relatively larger portion of their viewing on this more challenging or unpopular category.
+- Early years (1995–1999): Blockbusters dominate.
+At the start of the platform, the majority of ratings go to Blockbusters and other highly popular movies. Their share is the highest in the late 1990s, showing that early users mostly engaged with mainstream, well-known titles.
+
+- Around 2000–2001: A spike in Well-Liked Niche Films.
+The share of Well-Liked Niche Films rises sharply, becoming briefly the most rated category. This suggests that many users were discovering mid-popular, high-quality films during this period—possibly due to catalogue expansion or changing user interests.
+
+- 2002 onward: Popular Films gain momentum.
+After 2001, the share of Popular Films (mid-mainstream titles) grows steadily, indicating a shift toward more balanced and diverse movie consumption as the platform matures.
+
+- 2002–2005: Strong rise of Hated or Invisible Films.
+Surprisingly, the share of Hated Invisible Films increases noticeably during 2003–2005. This likely reflects the arrival of casual users who browse widely, try random low-rated films, and contribute scattered ratings.
+
+- Classic Films also increase after 2002. 
+Old Classics begin to attract more attention, peaking around mid-2000s. This shows growing interest in older, culturally important movies among the expanding user base.
+
+- Blockbusters remain stable but no longer dominant.
+Although mainstream films stay popular throughout the timeline, they gradually lose their early dominance as the platform becomes more diverse in terms of movie preferences.
+
+# Project Discoveries
+
+Uniting all of our analysis and results, we now can **decode the Audience**.
+Here we interpret every discovery that has been found to make the results clear and readable. 
+This section contains all about user behavior, viewing preferences and temporal trends to make  a clear audience interpretation and understand how each segments interacts with different genres.
+
+## What Each User Segment Watches
+
+**Consistent Enjoyers (Cluster 1)**
+
+- Behavior: Steady, moderate–high engagement. 
+- Viewing: Mostly Popular Films (43%) and Blockbusters (30%). 
+- Taste: Positive ratings (~3.7–3.8).
+
+**Insight**: A stable, satisfied core audience focused on mainstream titles.
+
+**Fan Visitors (Cluster 2)**
+
+Behavior: Very low activity, extremely generous ratings.
+Viewing: Blockbusters (52%), Popular Films (28%).
+Taste: Highest ratings of all clusters (4.4+).
+Insight: One-time visitors drawn to trending movies; high enthusiasm, no retention.
+
+**One-Movie Critics (Cluster 3)**
+
+- Behavior: Minimal activity, harsh scoring.
+- Viewing: Blockbusters (47%), Popular Films (20%), Controversial Films (18%), and uniquely Invisible Films (6%).
+- Taste: Lowest ratings across all genres (1.5–2.6)
+
+**Insight**: Niche explorers who rarely enjoy what they watch.
+
+**Loyal Occasional Enjoyers (Cluster 4)**
+
+- Behavior: Very long-term users with light but steady activity. 
+- Viewing: Popular Films (38%), Blockbusters (36%). 
+- Taste: Moderate positivity (≈3.5–3.7).
+
+**Insight**: Loyal but infrequent viewers who prefer mainstream content.
+
+**Heavy Enthusiasts (Cluster 5)**
+- Behavior: Highest engagement; wide exploration. 
+- Viewing: More diverse: Controversial Films (34%), Popular Films (37%), Classics (8%). 
+- Taste: Balanced, realistic ratings (~3.4–3.5).
+
+**Insight**: Deep catalog explorers enriching the platform’s depth.
+
+
+**Short-Term Users (Cluster 6)**
+- Behavior: Short-lived engagement; neutral ratings. 
+- Viewing: Blockbusters (48%), Popular Films (34%). 
+- Taste: Positive for mainstream, lower for niche.
+
+**Insight**: Trial-phase users who mostly consume promoted films.
+
+
+## How Each User Segment Rates Content
+- Fan Visitors inflate all ratings (4.4+).
+- Consistent Enjoyers, Loyal Occasionals, and Heavy Enthusiasts anchor the platform with realistic positive ratings (3.4–3.8).
+- Short-Term Users, resembles enjoyers but drops sharply on niche categories.
+- One-Movie Critics rates all clusters poorly
+
+**Insight**: Rating style clearly separates stable users from temporary or dissatisfied ones.
+
+
+## Temporal Behavior of User Segments
+
+- 1999–2001: Loyal Occasional Enjoyers temporarily dominate activity.
+- Post-2001: Consistent Enjoyers and Heavy Enthusiasts become the primary long-term groups.
+- Fan Visitors and Short-Term Users decline over time.
+- One-Movie Critics remain small.
+
+**Insight**: The user base shifts toward more stable, high-engagement profiles.
+
+## Temporal Behavior of Movie Clusters
+
+- Popular Films and Blockbusters rise and remain dominant after 1999–2000.
+- Niche and Invisible Films decline.
+- Old Classics remain small but present.
+- Controversial Films stay mid-tier.
+
+**Insight**: Consumption shifts increasingly toward mainstream genres.
+
+## Combined Segment-Genre Matching
+
+- Consistent enjoyers = Popular FIlms and Blockbusters
+- Fan visitors = Blockbusters and popular films 
+- Loyal Occasionals = popular films and blockbusters 
+- Heavy enthusiast = controversial and invisible films 
+- One movie critics = Controversial and invisible films 
+- Short term users = blockbusters and popular films
+
+## Overall
+
+Mainstream genres dominate nearly all viewer groups.
+Enthusiasts and Critics mainly prefer Niche and controversial categories.
+User behavior clearly separates long-term, valuable users from short-term ones.
+Consistent Enjoyers, Loyal Occasionals, and Heavy Enthusiasts - are the platform’s and most influential audience groups.
+Fan Visitors give high ratings but engage very little, while One-Movie Critics and Short-Term Users contribute minimal or irregular activity.
+Over time, stable user groups become more important and viewing becomes increasingly centered on popular genres.
+
+# Conclusion
+
+To conclude, even though our work focuses on how specific types of users interact with different types of movies, 
+grouping movies into pseudo-genres and users into behavioural segments, provides a clear analysis of the engagement, habits and patterns among any type of data.
+
+Still, some questions remain open. While our analysis reveals clear behavioural patterns, our project does not expand on how these user segments would react to new or upcoming releases. 
+
+This is essential area to strengthen future path toward building effective and accurate movie recommendation systems. 
+We could explore how users discover new data, as well as how new coming users would be placed into a proper audience segment.
+We believe, that natural next step would be to integrate temporal patterns and simple content features, allowing recommendations to adapt to evolving tastes and better predict how each behavioural group might engage with newly released movies.
+This whole project and its high interpretation allow us to build a strong foundation for possible future work in recommendations.
 
