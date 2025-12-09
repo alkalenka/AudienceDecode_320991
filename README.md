@@ -3,7 +3,7 @@
 **Team Leader:** Yelena Shabanova (320991)  
 **Team Members:** Alena Seliutina (323591), Luis Fernando Henriquez Patino (314661)
 
-In this project, we explored the Audience Decode task using unsupervised machine learning techniques. Report of our work will follow the numerical order that corresponds with the `main.ipynb` sections. The provided dataset  contains detailed rating histories for each user, summary statistics for both users and movies, and additional movies' attributes. Our goal was to explore and model audience behavior. Moreover, we aimed to identify meaningful groups of users, detect unusual behavioral patterns, and compare how different clustering algorithms perform on high-dimensional, noisy data.
+In this project, we explored the Audience Decode task using Unsupervised Clustering machine learning techniques. Report of our work will follow the numerical order that corresponds with the `main.ipynb` sections. The provided dataset  contains detailed rating histories for each user, summary statistics for both users and movies, and additional movies' attributes. Istead of predicting individual ratings, our goal was to explore and model audience behavior. Moreover, we aimed to identify meaningful groups of users, detect unusual behavioral patterns, and compare how different clustering algorithms perform on high-dimensional, noisy data.
 
 We started by performing an exploratory data analysis (EDA) on both users and movies. This helped us better understand rating distributions, activity patterns, and relationships between features. We first applied clustering to the movie dataset to create pseudo-genres since the project description mentions "analyzing interaction with genres" but this information is not provided in database. Therefore, we made our definition of content types based on features given in movie data. They later helped us interpret user preferences.
 
@@ -193,14 +193,14 @@ All figures M1–M7 are stored in the `images/` folder and referenced in the REA
 
 ---
 
-## 4. Preprocessing and Feature Engineering
+## 4. Data Preprocessing
 
 After completing the EDA, we prepared both user and movie data for clustering. Since our methods (KMeans, DBSCAN, BIRCH) are distance-based, they require a consistent set of numeric features, no missing values and features on comparable scales. To achieve this, we built two standardized feature matrices:
 
 - `X_users_kmeans` – standardized user-level behavioral features  
 - `X_movies_kmeans` – standardized movie-level features  
 
-These matrices are the direct input to the clustering models used in Sections 5 and 6.
+These matrices are the direct input to the clustering models used in all following sections.
 
 ### 4.1 User Feature Matrix
 
@@ -308,7 +308,7 @@ To visually inspect cluster separation, we reduced dimensionality to two princip
 **Figure MC3 – PCA scatterplot of movie clusters**  
 ![MC3 – movie clusters PCA](images/movie_clusters_pca_scatter.png)
 
-To visualize high dimensional clustering results, we applied a two component PCA. The resulting 2D scatterplot (using a sample of 8k movies for better clarity):
+To visualize high dimensional clustering results, we applied a two component PCA. The resulting 2D scatterplot (using a sample of 30k movies for better clarity):
 
 - Revealed well-separated regions corresponding to clusters  
 - Confirmed that the chosen features carry meaningful variance for grouping movies  
@@ -724,8 +724,7 @@ Mid-activity, stable users grow steadily and peak around 2004. They represent a 
 - Fan Visitors remain small but steady. 
 They contribute consistently but never dominate, which matches their behavior (rating only a couple of favourites).
 
-- Heavy Enthusiasts stay rare. T
-heir share is always low, but slowly increases over time—meaning “super-active” users exist, but they’re a small niche.
+- Heavy Enthusiasts stay rare. Their share is always low, but slowly increases over time—meaning “super-active” users exist, but they’re a small niche.
 
   
 ### Movie cluster (genres) popularity over time 
@@ -770,10 +769,10 @@ This section contains all about user behavior, viewing preferences and temporal 
 
 **Fan Visitors (Cluster 2)**
 
-Behavior: Very low activity, extremely generous ratings.
-Viewing: Blockbusters (52%), Popular Films (28%).
-Taste: Highest ratings of all clusters (4.4+).
-Insight: One-time visitors drawn to trending movies; high enthusiasm, no retention.
+- Behavior: Very low activity, extremely generous ratings. 
+- Viewing: Blockbusters (52%), Popular Films (28%). 
+- Taste: Highest ratings of all clusters (4.4+). 
+**Insight**: One-time visitors drawn to trending movies; high enthusiasm, no retention.
 
 **One-Movie Critics (Cluster 3)**
 
